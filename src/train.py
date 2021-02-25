@@ -55,7 +55,7 @@ def main(args):
     else:
         raise NameError('Invalid model name')
 
-    loss_fct = nn.BCEWithLogitsLoss()
+    loss_fct = nn.BCELoss()
     model.train(data_loader, val_data_loader, 10, loss_fct, 0.0002)
 
 if __name__ == "__main__":

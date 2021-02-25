@@ -1,7 +1,6 @@
 import torch.nn as nn
 import torch
 
-
 class BaselineNN(nn.Module):
     def __init__(self):
         super(BaselineNN, self).__init__()
@@ -26,4 +25,5 @@ class BaselineNN(nn.Module):
         x = self.linear(x)
         x = torch.mean(x, axis=0)
         #x = F.log_softmax(x, dim=0)
+        x = torch.sigmoid(x)
         return x
