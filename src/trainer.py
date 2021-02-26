@@ -62,16 +62,8 @@ class BaselineModel(ModelABC):
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
             val_acc = val_epoch(self.model, val_loader)
             print(f"Val acc: {val_acc} ")
-    
-    def predict(self, test_loader):
-        preds = []
-        for images, lymph_counts, gender, age, _ in test_loader:
-            probas = self.model(images[0,:])[None, :]
-            _, pred = torch.max(probas, axis=1)
-            preds.append(pred.item())
-        return preds
 
-    def get_predictions(self, test_loader):
+    def predict(self, test_loader):
         print("\nComputing predictions")
         y_preds = []
         self.model.eval()

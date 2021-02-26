@@ -52,7 +52,7 @@ def main(args):
     loss_fct = nn.BCELoss()
     model.train(train_loader, val_loader, args.epochs, loss_fct, args.learning_rate)
 
-    predictions = model.get_predictions(test_loader)
+    predictions = model.predict(test_loader)
     path_submission = os.path.join('..', 'submissions', f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
     submission = pd.DataFrame({'ID': test_dst.df.index.values,
                    'LABEL': predictions})
