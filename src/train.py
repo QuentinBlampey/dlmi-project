@@ -6,6 +6,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import argparse
 import json
+from datetime import datetime
 
 from trainer import BaselineModel
 from models import BaselineNN
@@ -39,9 +40,9 @@ def main(args):
     val_dst = LymphDataset(path_val, df_val, get_transform(False))
     test_dst = LymphDataset(path_test, df_test, get_transform(False))
 
-    train_loader = DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=8)
-    val_loader = DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=8)
-    test_loader = DataLoader(test_dst, batch_size=1, shuffle=False, num_workers=8)
+    train_loader = DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=args.num_workers)
+    val_loader = DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=args.num_workers)
+    test_loader = DataLoader(test_dst, batch_size=1, shuffle=False, num_workers=args.num_workers)
 
     if args.model == 'BaselineNN':
         model = BaselineModel(BaselineNN(), device)
@@ -51,12 +52,20 @@ def main(args):
     loss_fct = nn.BCELoss()
     model.train(train_loader, val_loader, args.epochs, loss_fct, args.learning_rate)
 
+    predictions = model.get_predictions(test_loader)
+    path_submission = os.path.join('..', 'submissions', f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
+    submission = pd.DataFrame({'ID': test_dst.df.index.values,
+                   'LABEL': predictions})
+    submission.to_csv(path_submission, index=False)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", type=str, default="BaselineNN",
         help="model name")
     parser.add_argument("-e", "--epochs", type=int, default=10, 
         help="number of epochs")
+    parser.add_argument("-nw", "--num_workers", type=int, default=8, 
+        help="number of workers")
     parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4, 
         help="dataset learning rate")
 
