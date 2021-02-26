@@ -38,7 +38,7 @@ class LymphDataset(torch.utils.data.Dataset):
         label = torch.as_tensor(self.data_dict[image_id]["label"], dtype=torch.int64)
         
         if self.transforms:
-            images = torch.cat([self.transforms(image)[None, :, :, :] for image in images], axis=0)
+            images = torch.stack([self.transforms(image) for image in images])
         
         return images, lymph_counts, gender, age, label
     
