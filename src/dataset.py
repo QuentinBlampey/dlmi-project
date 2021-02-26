@@ -43,4 +43,5 @@ class LymphDataset(torch.utils.data.Dataset):
         return images, lymph_counts, gender, age, label
     
     def __len__(self):
-        return 2 if len(self.data_dict) != 42 else 42
+        return len(self.data_dict)
+        #return 2 if len(self.data_dict) != 42 else 42

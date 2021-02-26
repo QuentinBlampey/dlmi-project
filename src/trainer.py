@@ -79,5 +79,5 @@ class BaselineModel(ModelABC):
             images = images.to(self.model.device)
             probas = self.model(images[0,:])
             pred = torch.round(probas)
-            y_preds.append(pred.item())
+            y_preds.append(int(pred.item()))
         return y_preds
