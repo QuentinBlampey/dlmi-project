@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
 
-class MeanAggregation():
+class MeanAggregator():
     def __call__(self, x):
         return torch.mean(x, axis=0)
 
-class DotAttentionAggregation(nn.Module):
+class DotAttentionAggregator(nn.Module):
     def __init__(self, size):
-        super(DotAttentionAggregation, self).__init__()
+        super(DotAttentionAggregator, self).__init__()
         self.fc = nn.Linear(size, 1)
 
     def __call__(self, x):

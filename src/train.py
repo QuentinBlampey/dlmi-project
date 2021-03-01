@@ -8,8 +8,10 @@ import argparse
 import json
 from datetime import datetime
 
-from trainer import BaselineModel
-from models import BaselineNN
+from models.aggregators import MeanAggregator, DotAttentionAggregator
+from models.back_bone import BackBone
+from models.cnn import BaselineCNN
+from models.top_head import FullyConnectedHead
 from dataset import LymphDataset, get_transform
 
 
@@ -18,6 +20,8 @@ def main(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"> Device: {device}\n")
     
+    ### Loaders construction
+
     files = []
     for dirname, _, filenames in os.walk('../3md3070-dlmi'):
         for filename in filenames:
@@ -44,13 +48,32 @@ def main(args):
     val_loader = DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=args.num_workers)
     test_loader = DataLoader(test_dst, batch_size=1, shuffle=False, num_workers=args.num_workers)
 
-    if args.model == 'BaselineNN':
-        model = BaselineModel(BaselineNN(), device)
-    else:
-        raise NameError('Invalid model name')
 
-    loss_fct = nn.BCELoss()
-    model.train(train_loader, val_loader, args.epochs, loss_fct, args.learning_rate)
+    ### CNN
+    if args.cnn == 'baseline':
+        cnn = BaselineCNN(size=args.size)
+    else:
+        raise NameError('Invalid cnn name')
+
+    ### Aggregator
+    if args.aggregator == 'mean':
+        aggregator = MeanAggregator()
+    elif args.aggregator == 'dot':
+        aggregator = DotAttentionAggregator(args.size)
+    else:
+        raise NameError('Invalid aggregator name')
+
+    ### Top head
+    if args.top_head == 'fc':
+        top_head = FullyConnectedHead(args.size)
+    else:
+        raise NameError('Invalid top_head name')
+
+    ### Training
+
+    model = BackBone(cnn, aggregator, top_head, device)
+    loss_fct = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([50/113]))
+    model.train_and_eval(train_loader, val_loader, args.epochs, loss_fct, args.learning_rate)
 
     predictions = model.predict(test_loader)
     path_submission = os.path.join('..', 'submissions', f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
@@ -60,10 +83,16 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--model", type=str, default="BaselineNN",
-        help="model name")
+    parser.add_argument("-c", "--cnn", type=str, default="baseline", choices=['baseline'],
+        help="cnn name")
+    parser.add_argument("-a", "--aggregator", type=str, default="mean",
+        choices=['baseline', 'dot'], help="aggregator name")
+    parser.add_argument("-t", "--top_head", type=str, default="fc",
+        choices=['fc'], help="top head name")
     parser.add_argument("-e", "--epochs", type=int, default=10, 
         help="number of epochs")
+    parser.add_argument("-s", "--size", type=int, default=16, 
+        help="cnn output size")
     parser.add_argument("-nw", "--num_workers", type=int, default=8, 
         help="number of workers")
     parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4, 

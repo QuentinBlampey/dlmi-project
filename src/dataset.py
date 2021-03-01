@@ -32,15 +32,16 @@ class LymphDataset(torch.utils.data.Dataset):
     
     def __getitem__(self, image_id):
         images = [self.load_image(path) for path in self.data_dict[image_id]['path']]
-        lymph_counts = torch.as_tensor(self.data_dict[image_id]["lymph_count"], dtype=torch.float32)
-        gender = torch.as_tensor(self.data_dict[image_id]["gender"], dtype=torch.int64)
-        age = torch.as_tensor(self.data_dict[image_id]["age"], dtype=torch.int64)
+        medical_data = torch.as_tensor([
+            self.data_dict[image_id]["lymph_count"],
+            self.data_dict[image_id]["gender"],
+            self.data_dict[image_id]["age"]], dtype=torch.float32)
         label = torch.as_tensor(self.data_dict[image_id]["label"], dtype=torch.int64)
         
         if self.transforms:
             images = torch.stack([self.transforms(image) for image in images])
         
-        return images, lymph_counts, gender, age, label
+        return images, medical_data, label
     
     def __len__(self):
         return len(self.data_dict)
