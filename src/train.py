@@ -80,7 +80,7 @@ def main(args):
     predictions = model.predict(test_loader)
     path_submission = os.path.join('..', 'submissions', f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
     submission = pd.DataFrame({'ID': test_dst.df.index.values,
-                   'LABEL': predictions})
+                   'Prediction': predictions})
     submission.to_csv(path_submission, index=False)
 
 if __name__ == "__main__":
