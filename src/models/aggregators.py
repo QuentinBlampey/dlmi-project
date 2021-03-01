@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-class MeanAggregator():
-    def __call__(self, x):
+class MeanAggregator(nn.Module):
+    def forward(self, x):
         return torch.mean(x, axis=0)
 
 class DotAttentionAggregator(nn.Module):
@@ -10,7 +10,7 @@ class DotAttentionAggregator(nn.Module):
         super(DotAttentionAggregator, self).__init__()
         self.fc = nn.Linear(size, 1)
 
-    def __call__(self, x):
+    def forward(self, x):
         """
         x: a (n_samples * size) tensor
         returns: a (size) tensor

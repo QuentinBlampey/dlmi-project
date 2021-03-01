@@ -9,10 +9,10 @@ from sklearn.metrics import balanced_accuracy_score
 class BackBone(nn.Module):
     def __init__(self, cnn, aggregator, top_head, device):
         super(BackBone, self).__init__()
-        self.cnn = cnn
-        self.aggregator = aggregator
-        self.top_head = top_head
         self.device = device
+        self.cnn = cnn.to(self.device)
+        self.aggregator = aggregator.to(self.device)
+        self.top_head = top_head.to(self.device)
         self.to(self.device)
 
     def forward(self, images, medical_data):
