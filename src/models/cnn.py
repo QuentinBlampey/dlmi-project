@@ -20,6 +20,10 @@ class BaselineCNN(nn.Module):
         )
     
     def forward(self, images):
+        """
+        images: a (n_images * 3 * image_size * image_size) tensor
+        returns: a (n_images * size) tensor
+        """
         x = self.convnet(images)
         x = torch.flatten(x, start_dim=1)
         x = self.linear(x)

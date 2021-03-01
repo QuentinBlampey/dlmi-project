@@ -12,6 +12,11 @@ class FullyConnectedHead(nn.Module):
         )
     
     def forward(self, x, medical_data):
+        """
+        x: a (size) tensor
+        medical_data: a (3) tensor
+        returns: a scalar tensor
+        """
         x = torch.cat((x, medical_data))
         x = self.fc(x)
         return x
