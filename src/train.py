@@ -71,7 +71,7 @@ def main(args):
 
     ### Training
 
-    model = BackBone(cnn, aggregator, top_head, device)
+    model = BackBone(cnn, aggregator, top_head, device).to(device)
     loss_fct = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([50/113]))
     model.train_and_eval(train_loader, val_loader, args.epochs, loss_fct, args.learning_rate)
 
