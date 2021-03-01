@@ -29,7 +29,9 @@ class BackBone(nn.Module):
             label = label.type(torch.FloatTensor).to(self.device)
             logits = self(images, medical_data)
             pred = torch.round(torch.sigmoid(logits))
-
+            print(self.device)
+            print(label.type())
+            print(logits.type())
             loss = self.loss_function(logits, label)
             epoch_loss += loss
             y_preds.append(int(pred.item()))
