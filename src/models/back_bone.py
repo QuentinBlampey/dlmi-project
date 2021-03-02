@@ -43,8 +43,8 @@ class BackBone(nn.Module):
         acc = balanced_accuracy_score(np.array(y_preds), np.array(y_true))
         return epoch_loss, acc
 
-    def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate):
-        self.optimizer = Adam(self.parameters(), learning_rate)
+    def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay):
+        self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
         for epoch in range(n_epochs):

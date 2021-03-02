@@ -75,7 +75,7 @@ def main(args):
 
     pos_weight = torch.tensor([50/113]).to(device)
     loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    model.train_and_eval(train_loader, val_loader, args.epochs, loss_fct, args.learning_rate)
+    model.train_and_eval(train_loader, val_loader, args.epochs, loss_fct, args.learning_rate, args.weight_decay)
 
     predictions = model.predict(test_loader)
     path_submission = os.path.join('..', 'submissions', f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
@@ -99,6 +99,9 @@ if __name__ == "__main__":
         help="number of workers")
     parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4, 
         help="dataset learning rate")
+    parser.add_argument("-wd", "--weight_decay", type=float, default=0, 
+        help="dataset learning rate")
+
 
     args = parser.parse_args()
     print(f"> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
