@@ -10,7 +10,7 @@ from datetime import datetime
 
 from models.aggregators import MeanAggregator, DotAttentionAggregator
 from models.back_bone import BackBone
-from models.cnn import BaselineCNN
+from models.cnn import BaselineCNN, PretrainedCNN
 from models.top_head import FullyConnectedHead
 from dataset import LymphDataset, get_transform
 
@@ -53,7 +53,7 @@ def main(args):
     if args.cnn == 'baseline':
         cnn = BaselineCNN(size=args.size)
     else:
-        raise NameError('Invalid cnn name')
+        cnn = PretrainedCNN(size=args.size, cnn=args.cnn)
 
     ### Aggregator
     if args.aggregator == 'mean':
@@ -85,7 +85,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--cnn", type=str, default="baseline", choices=['baseline'],
+    parser.add_argument("-c", "--cnn", type=str, default="baseline", choices=['baseline', 'vgg11', 'resnet18'],
         help="cnn name")
     parser.add_argument("-a", "--aggregator", type=str, default="mean",
         choices=['baseline', 'dot'], help="aggregator name")
