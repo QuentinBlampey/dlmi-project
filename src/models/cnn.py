@@ -8,15 +8,9 @@ class BaselineCNN(nn.Module):
             nn.Conv2d(3, 6, kernel_size=3),
             nn.ReLU(),
             nn.MaxPool2d((2, 2)),
-            nn.Conv2d(6, 9, kernel_size=3),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 2)),
-            nn.Conv2d(9, 12, kernel_size=3),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 2))
         )
         self.linear = nn.Sequential(
-            nn.Linear(12 * 26 * 26, size),
+            nn.Linear(6 * 111 * 111, size),
         )
 
     def forward(self, images):
