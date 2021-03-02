@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from models.aggregators import MeanAggregator, DotAttentionAggregator
 from models.back_bone import BackBone
 from models.cnn import BaselineCNN, PretrainedCNN
-from models.top_head import FullyConnectedHead
+from models.top_head import FullyConnectedHead, LinearHead
 from dataset import LymphDataset, get_transform
 
 
@@ -73,6 +73,8 @@ def main(args):
     ### Top head
     if args.top_head == 'fc':
         top_head = FullyConnectedHead(args.size)
+    elif args.top_head == 'linear':
+        top_head = LinearHead(args.size)
     else:
         raise NameError('Invalid top_head name')
 
@@ -97,7 +99,7 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--aggregator", type=str, default="mean",
         choices=['baseline', 'dot'], help="aggregator name")
     parser.add_argument("-t", "--top_head", type=str, default="fc",
-        choices=['fc'], help="top head name")
+        choices=['fc', 'linear'], help="top head name")
     parser.add_argument("-e", "--epochs", type=int, default=10, 
         help="number of epochs")
     parser.add_argument("-s", "--size", type=int, default=16, 
