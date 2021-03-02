@@ -42,7 +42,7 @@ class LymphDataset(torch.utils.data.Dataset):
         if self.transforms:
             images = torch.cat([self.transforms(image)[None, :, :, :] for image in images], axis=0)
 
-        return images, lymph_counts, gender, age, label
+        return images, torch.tensor([lymph_counts, gender, age]), label
 
     def __len__(self):
         return len(self.data_dict)
