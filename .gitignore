@@ -2,6 +2,7 @@
 .vscode
 DS_Store
 .idea/
+Untitled*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

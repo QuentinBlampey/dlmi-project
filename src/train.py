@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 import argparse
 import json
 from datetime import datetime
+from sklearn.preprocessing import StandardScaler
 
 from models.aggregators import MeanAggregator, DotAttentionAggregator
 from models.back_bone import BackBone
@@ -28,6 +29,12 @@ def main(args):
             files.append(os.path.join(dirname, filename))
 
     clinical_df = pd.read_csv("../3md3070-dlmi/clinical_annotation.csv", index_col="ID")
+    clinical_df['AGE'] = clinical_df['DOB'].apply(lambda dob: 2021 - int(dob[-4:]))
+    clinical_df['GENDER'] = clinical_df['GENDER'].apply(lambda gender: 1 if gender == "M" else -1)
+
+    scaler = StandardScaler()
+    clinical_df[['LYMPH_COUNT', 'AGE']] = scaler.fit_transform(clinical_df[['LYMPH_COUNT', 'AGE']])
+
     df_test = clinical_df[clinical_df["LABEL"] == -1]
     df = clinical_df[clinical_df["LABEL"] != -1]
 
