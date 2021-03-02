@@ -20,4 +20,4 @@ source activate /gpfs/users/piatc/.conda/envs/gr
 cd ${SLURM_SUBMIT_DIR}
 
 # Execution
-python -u src/train.py -e 10 -lr 2e-4
+python -u train.py -e 10 -lr 2e-4
