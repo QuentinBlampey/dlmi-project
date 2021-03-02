@@ -30,9 +30,16 @@ class PretrainedCNN(nn.Module):
         if cnn == 'vgg11':
             self.net  = torch.hub.load('pytorch/vision:v0.6.0', 'vgg11', pretrained=True)
             self.net .classifier[6] = nn.Linear(4096, size)
+            # freeze top layers
+            for layer in self.net.features:
+                for p in layer.parameters():
+                    p.requires_grad = False
+
         elif cnn == 'resnet18':
+            # WIP
             self.net = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=True)
             self.net.fc = nn.Linear(512, size)
+
         else:
             raise NameError('Invalid cnn name')
 
