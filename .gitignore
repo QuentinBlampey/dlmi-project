@@ -1,6 +1,7 @@
 3md3070-dlmi*
 .vscode
 DS_Store
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
