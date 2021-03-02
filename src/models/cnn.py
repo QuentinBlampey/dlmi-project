@@ -41,9 +41,14 @@ class PretrainedCNN(nn.Module):
         else:
             raise NameError('Invalid cnn name')
 
-    def forward(self, images):
+    def forward(self, images, batch_size=4):
         """
         images: a (n_images * 3 * image_size * image_size) tensor
         returns: a (n_images * size) tensor
         """
-        return self.net(images)
+        result = self.net(images[:batch_size])
+        for i in range(batch_size, len(images)+1, batch_size):
+            outputs = self.net(images[i:i+batch_size])
+            result = torch.cat((result, outputs), 0)
+
+        return result
