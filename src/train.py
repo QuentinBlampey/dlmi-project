@@ -1,23 +1,23 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-import os
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
 import argparse
 import json
+import os
 from datetime import datetime
 
-from trainer import BaselineModel
-from models import BaselineNN
+import pandas as pd
+import torch
+import torch.nn as nn
 from dataset import LymphDataset, get_transform
+from models import BaselineNN
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader
+from trainer import BaselineModel
 
 
 def main(args):
     torch.manual_seed(1)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"> Device: {device}\n")
-    
+
     files = []
     for dirname, _, filenames in os.walk('../3md3070-dlmi'):
         for filename in filenames:
@@ -55,19 +55,20 @@ def main(args):
     predictions = model.predict(test_loader)
     path_submission = os.path.join('..', 'submissions', f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
     submission = pd.DataFrame({'ID': test_dst.df.index.values,
-                   'LABEL': predictions})
+                               'LABEL': predictions})
     submission.to_csv(path_submission, index=False)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", type=str, default="BaselineNN",
-        help="model name")
-    parser.add_argument("-e", "--epochs", type=int, default=10, 
-        help="number of epochs")
-    parser.add_argument("-nw", "--num_workers", type=int, default=8, 
-        help="number of workers")
-    parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4, 
-        help="dataset learning rate")
+                        help="model name")
+    parser.add_argument("-e", "--epochs", type=int, default=10,
+                        help="number of epochs")
+    parser.add_argument("-nw", "--num_workers", type=int, default=8,
+                        help="number of workers")
+    parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4,
+                        help="dataset learning rate")
 
     args = parser.parse_args()
     print(f"> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")

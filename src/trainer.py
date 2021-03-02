@@ -32,7 +32,7 @@ def train_epoch(model, train_loader, optimizer, loss_function):
         y_preds.append(pred.item())
         y_true.append(label.item())
     acc = balanced_accuracy_score(np.array(y_preds), np.array(y_true))
-    return loss, acc
+    return epoch_loss, acc
 
 def val_epoch(model, val_loader):
     y_preds = []
