@@ -8,6 +8,7 @@ def get_transform(train):
     transforms = []
     transforms.append(T.ToPILImage())  # converts the image, a PIL image, into a PyTorch Tensor
     transforms.append(T.Resize(224))
+    #transforms.append(T.GaussianBlur(3, sigma=.5))
     if train:
         transforms.append(T.RandomRotation(180))
         transforms.append(T.RandomHorizontalFlip())
