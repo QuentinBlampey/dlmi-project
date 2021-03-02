@@ -53,20 +53,22 @@ class BackBone(nn.Module):
             self.train()
             train_loss, train_acc = self.step(train_loader)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
-
+            
             self.eval()
-            _, val_acc = self.step(val_loader)
+            with torch.no_grad():
+                _, val_acc = self.step(val_loader)
             print(f"Val acc: {val_acc} ")
 
     def predict(self, test_loader):
         print("\nComputing predictions")
         y_preds = []
         self.eval()
-        for images, medical_data, _ in tqdm(test_loader):
-            images = images.to(self.device)[0,:]
-            medical_data = medical_data.to(self.device)[0,:]
-            logits = self(images, medical_data)
-            pred = torch.round(torch.sigmoid(logits))
-            y_preds.append(int(pred.item()))
+        with torch.no_grad():
+            for images, medical_data, _ in tqdm(test_loader):
+                images = images.to(self.device)[0,:]
+                medical_data = medical_data.to(self.device)[0,:]
+                logits = self(images, medical_data)
+                pred = torch.round(torch.sigmoid(logits))
+                y_preds.append(int(pred.item()))
 
         return y_preds
