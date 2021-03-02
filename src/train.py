@@ -31,7 +31,7 @@ def main(args):
     df_test = clinical_df[clinical_df["LABEL"] == -1]
     df = clinical_df[clinical_df["LABEL"] != -1]
 
-    ID_train, ID_val = train_test_split(df.index.values, test_size=0.2, random_state=1, stratify=df.LABEL.values)
+    ID_train, ID_val = train_test_split(df.index.values, test_size=args.test_size, random_state=1, stratify=df.LABEL.values)
 
     df_train = df.loc[ID_train]
     df_val = df.loc[ID_val]
@@ -100,6 +100,8 @@ if __name__ == "__main__":
     parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4, 
         help="dataset learning rate")
     parser.add_argument("-wd", "--weight_decay", type=float, default=0, 
+        help="dataset learning rate")
+    parser.add_argument("-ts", "--test_size", type=float, default=0.2, 
         help="dataset learning rate")
 
 
