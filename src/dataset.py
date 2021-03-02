@@ -9,7 +9,9 @@ def get_transform(train):
     transforms.append(T.ToPILImage())  # converts the image, a PIL image, into a PyTorch Tensor
     transforms.append(T.Resize(224))
     if train:
-        pass
+        transforms.append(T.RandomRotation(180))
+        transforms.append(T.RandomHorizontalFlip())
+        transforms.append(T.RandomVerticalFlip())
     transforms.append(T.ToTensor())
     return T.Compose(transforms)
 
