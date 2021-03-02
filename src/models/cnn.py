@@ -47,7 +47,7 @@ class PretrainedCNN(nn.Module):
         returns: a (n_images * size) tensor
         """
         result = self.net(images[:batch_size])
-        for i in range(batch_size, len(images)+1, batch_size):
+        for i in range(batch_size, len(images), batch_size):
             outputs = self.net(images[i:i+batch_size])
             result = torch.cat((result, outputs), 0)
 
