@@ -1,10 +1,10 @@
-from torch.optim import Adam
+import numpy as np
 import torch
 import torch.nn as nn
-from tqdm import tqdm
-import numpy as np
 from sklearn.metrics import balanced_accuracy_score
-        
+from torch.optim import Adam
+from tqdm import tqdm
+
 
 class BackBone(nn.Module):
     def __init__(self, cnn, aggregator, top_head, device):
@@ -22,14 +22,14 @@ class BackBone(nn.Module):
     def step(self, loader):
         epoch_loss = 0.0
         y_preds, y_true = [], []
-        
+
         for images, medical_data, label in tqdm(loader):
-            images = images.to(self.device)[0,:]
-            medical_data = medical_data.to(self.device)[0,:]
+            images = images.to(self.device)[0, :]
+            medical_data = medical_data.to(self.device)[0, :]
             label = label.type(torch.FloatTensor).to(self.device)
             logits = self(images, medical_data)
             pred = torch.round(torch.sigmoid(logits))
-            
+
             loss = self.loss_function(logits, label)
             epoch_loss += loss
             y_preds.append(int(pred.item()))
@@ -53,11 +53,12 @@ class BackBone(nn.Module):
             self.train()
             train_loss, train_acc = self.step(train_loader)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
-            
+
             self.eval()
             with torch.no_grad():
                 _, val_acc = self.step(val_loader)
             print(f"Val acc: {val_acc} ")
+        return val_acc
 
     def predict(self, test_loader):
         print("\nComputing predictions")
@@ -65,8 +66,8 @@ class BackBone(nn.Module):
         self.eval()
         with torch.no_grad():
             for images, medical_data, _ in tqdm(test_loader):
-                images = images.to(self.device)[0,:]
-                medical_data = medical_data.to(self.device)[0,:]
+                images = images.to(self.device)[0, :]
+                medical_data = medical_data.to(self.device)[0, :]
                 logits = self(images, medical_data)
                 pred = torch.round(torch.sigmoid(logits))
                 y_preds.append(int(pred.item()))
