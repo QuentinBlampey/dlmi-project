@@ -85,7 +85,7 @@ def main(args):
     loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     accuracies = cross_validate(model_factory, df, files, int(args.kfolds), args.epochs, loss_fct, args.learning_rate, args.weight_decay,
                    args.num_workers)
-    print(f"Average accuracy: {np.mean(accuracies)}")
+    print(f"\nAverage accuracy: {np.mean(accuracies)}, ({accuracies})")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
