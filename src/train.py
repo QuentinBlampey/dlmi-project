@@ -28,7 +28,7 @@ def main(args):
         for filename in filenames:
             files.append(os.path.join(dirname, filename))
 
-    clinical_df = pd.read_csv("../3md3070-dlmi/clinical_annotation.csv", index_col="ID")
+    clinical_df = pd.read_csv(args.dataset, index_col="ID")
     clinical_df['AGE'] = clinical_df['DOB'].apply(lambda dob: 2021 - int(dob[-4:]))
     clinical_df['GENDER'] = clinical_df['GENDER'].apply(lambda gender: 1 if gender == "M" else -1)
 
@@ -104,6 +104,8 @@ if __name__ == "__main__":
                         help="dataset learning rate")
     parser.add_argument("-ts", "--test_size", type=float, default=0.2,
                         help="dataset learning rate")
+    parser.add_argument("-d", "--dataset", type=str, default="../3md3070-dlmi/clinical_annotation.csv",
+                        help="path to the dataset")
 
     args = parser.parse_args()
     print(f"> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
