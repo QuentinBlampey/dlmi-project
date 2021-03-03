@@ -2,12 +2,12 @@ import argparse
 import json
 import os
 
+import pandas as pd
 import torch
 import torch.nn as nn
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
-import pandas as pd
 
 from models.aggregators import MeanAggregator, DotAttentionAggregator
 from models.back_bone import BackBone
