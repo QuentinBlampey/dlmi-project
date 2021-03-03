@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+import torchvision.models as models
 
 class BaselineCNN(nn.Module):
     def __init__(self, size=16):
@@ -29,11 +30,20 @@ class PretrainedCNN(nn.Module):
         super(PretrainedCNN, self).__init__()
         if cnn == 'vgg11':
             self.net  = torch.hub.load('pytorch/vision:v0.6.0', 'vgg11', pretrained=True)
-            self.net .classifier[6] = nn.Linear(4096, size)
+            self.net.classifier[6] = nn.Linear(4096, size)
             # freeze top layers
             for layer in self.net.features:
                 for p in layer.parameters():
                     p.requires_grad = False
+
+        elif cnn == 'vgg16':
+            self.net = models.vgg16(pretrained=True)
+            self.net.classifier.add_module("relu", nn.ReLU(inplace=True))
+            self.net.classifier.add_module("last_layer", nn.Linear(1000, size))
+
+            for name, param in self.net.named_parameters():
+                if not name.split('.')[0] == 'classifier':
+                    param.requires_grad = False
 
         elif cnn == 'resnet18':
             self.net = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=True)
