@@ -92,7 +92,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--cnn", type=str, default="baseline", choices=['baseline', 'vgg11', 'vgg16', 'resnet18'],
                         help="cnn name")
     parser.add_argument("-a", "--aggregator", type=str, default="mean",
-                        choices=['baseline', 'dot'], help="aggregator name")
+                        choices=['mean', 'dot'], help="aggregator name")
     parser.add_argument("-t", "--top_head", type=str, default="fc",
                         choices=['fc', 'linear'], help="top head name")
     parser.add_argument("-e", "--epochs", type=int, default=10,
