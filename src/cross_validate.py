@@ -89,7 +89,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--cnn", type=str, default="baseline", choices=['baseline', 'vgg11', 'resnet18'],
+    parser.add_argument("-c", "--cnn", type=str, default="baseline", choices=['baseline', 'vgg11', 'vgg16', 'resnet18'],
                         help="cnn name")
     parser.add_argument("-a", "--aggregator", type=str, default="mean",
                         choices=['baseline', 'dot'], help="aggregator name")
