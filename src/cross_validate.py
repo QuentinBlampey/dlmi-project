@@ -56,29 +56,29 @@ def main(args):
 
     df = clinical_df[clinical_df["LABEL"] != -1]
 
-    ### CNN
-    if args.cnn == 'baseline':
-        cnn = BaselineCNN(size=args.size)
-    else:
-        cnn = PretrainedCNN(size=args.size, cnn=args.cnn)
-
-    ### Aggregator
-    if args.aggregator == 'mean':
-        aggregator = MeanAggregator()
-    elif args.aggregator == 'dot':
-        aggregator = DotAttentionAggregator(args.size)
-    else:
-        raise NameError('Invalid aggregator name')
-
-    ### Top head
-    if args.top_head == 'fc':
-        top_head = FullyConnectedHead(args.size)
-    elif args.top_head == 'linear':
-        top_head = LinearHead(args.size)
-    else:
-        raise NameError('Invalid top_head name')
-
     def model_factory():
+        ### CNN
+        if args.cnn == 'baseline':
+            cnn = BaselineCNN(size=args.size)
+        else:
+            cnn = PretrainedCNN(size=args.size, cnn=args.cnn)
+
+        ### Aggregator
+        if args.aggregator == 'mean':
+            aggregator = MeanAggregator()
+        elif args.aggregator == 'dot':
+            aggregator = DotAttentionAggregator(args.size)
+        else:
+            raise NameError('Invalid aggregator name')
+
+        ### Top head
+        if args.top_head == 'fc':
+            top_head = FullyConnectedHead(args.size)
+        elif args.top_head == 'linear':
+            top_head = LinearHead(args.size)
+        else:
+            raise NameError('Invalid top_head name')
+
         return BackBone(cnn, aggregator, top_head, device).to(device)
 
     pos_weight = torch.tensor([50 / 113]).to(device)
