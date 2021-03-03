@@ -78,7 +78,7 @@ def main(args):
     model.train_only(train_loader, args.epochs, loss_fct, args.learning_rate, args.weight_decay)
 
     predictions = model.predict(test_loader)
-    path_submission = os.path.join('..', 'submissions', f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
+    path_submission = os.path.join(args.submission, f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
     submission = pd.DataFrame({'ID': test_dst.df.index.values,
                                'Predicted': predictions})
     submission.to_csv(path_submission, index=False)
@@ -106,6 +106,7 @@ if __name__ == "__main__":
                         help="dataset learning rate")
     parser.add_argument("-d", "--dataset", type=str, default="../3md3070-dlmi/",
                         help="path to the dataset")
+    parser.add_argument("-sub", "--submission",  type=str, default="../submissions", help="path to submission folder")
 
     args = parser.parse_args()
     print(f"> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
