@@ -79,6 +79,7 @@ def main(args):
 
     predictions = model.predict(test_loader)
     path_submission = os.path.join('..', 'submissions', f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
+    print('\npath_submission:', path_submission)
     submission = pd.DataFrame({'ID': test_dst.df.index.values,
                                'Predicted': predictions})
     submission.to_csv(path_submission, index=False)
