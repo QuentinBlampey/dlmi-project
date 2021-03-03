@@ -83,7 +83,7 @@ def main(args):
 
     pos_weight = torch.tensor([50 / 113]).to(device)
     loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    accuracies = cross_validate(model_factory, df, files, args.kfolds, args.epochs, loss_fct, args.learning_rate, args.weight_decay,
+    accuracies = cross_validate(model_factory, df, files, int(args.kfolds), args.epochs, loss_fct, args.learning_rate, args.weight_decay,
                    args.num_workers)
     print(f"Average accuracy: {np.mean(accuracies)}")
 
