@@ -96,7 +96,7 @@ if __name__ == "__main__":
                         choices=['baseline', 'dot'], help="aggregator name")
     parser.add_argument("-t", "--top_head", type=str, default="fc",
                         choices=['fc', 'linear'], help="top head name")
-    parser.add_argument("-e", "--epochs", type=int, default=1,
+    parser.add_argument("-e", "--epochs", type=int, default=10,
                         help="number of epochs")
     parser.add_argument("-s", "--size", type=int, default=16,
                         help="cnn output size")
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                         help="dataset learning rate")
     parser.add_argument("-wd", "--weight_decay", type=float, default=0,
                         help="optimizer weight decay")
-    parser.add_argument("-k", "--kfolds", type=float, default=2,
+    parser.add_argument("-k", "--kfolds", type=float, default=5,
                         help="Number of folds")
 
     args = parser.parse_args()
