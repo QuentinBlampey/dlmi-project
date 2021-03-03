@@ -53,6 +53,13 @@ class PretrainedCNN(nn.Module):
 
             self.net.fc = nn.Linear(512, size)
 
+        elif cnn == 'resnet101':
+            self.net = models.resnet101(pretrained=True)
+            for layer in list(self.net.children())[:-10]:
+                for param in layer.parameters():
+                    param.require_grad = False
+            self.net.fc = nn.Linear(2048, size)
+
         else:
             raise NameError('Invalid cnn name')
 
