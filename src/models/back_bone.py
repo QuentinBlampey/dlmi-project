@@ -60,6 +60,16 @@ class BackBone(nn.Module):
             print(f"Val acc: {val_acc} ")
         return val_acc
 
+    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay):
+        self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
+        self.loss_function = loss_function
+
+        for epoch in range(n_epochs):
+            print(f"\nEpoch {epoch + 1}/{n_epochs}")
+            self.train()
+            train_loss, train_acc = self.step(train_loader)
+            print(f"Train loss: {train_loss} | Train acc: {train_acc}")
+
     def predict(self, test_loader):
         print("\nComputing predictions")
         y_preds = []
