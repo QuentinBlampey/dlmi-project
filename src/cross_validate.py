@@ -18,10 +18,9 @@ import numpy as np
 
 def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers):
     kf = KFold(k, random_state=0, shuffle=True)
-    n = 1
     accuracies = []
-    for train_index, val_index in kf.split(df.index.values):
-        print(f"Fold {n}")
+    for n, (train_index, val_index) in enumerate(kf.split(df.index.values)):
+        print(f"Fold {n+1}")
         df_train = df.iloc[train_index]
         df_val = df.iloc[val_index]
         path_train = [[file for file in files if p_id + '/' in file] for p_id in df_train.index]
