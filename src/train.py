@@ -100,9 +100,9 @@ if __name__ == "__main__":
     parser.add_argument("-nw", "--num_workers", type=int, default=8,
                         help="number of workers")
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-4,
-                        help="dataset learning rate")
+                        help="learning rate")
     parser.add_argument("-wd", "--weight_decay", type=float, default=1e-5,
-                        help="dataset learning rate")
+                        help="weight decay for L2 regularization")
     parser.add_argument("-ts", "--test_size", type=float, default=0.2,
                         help="dataset learning rate")
     parser.add_argument("-d", "--dataset", type=str, default="../3md3070-dlmi/",
