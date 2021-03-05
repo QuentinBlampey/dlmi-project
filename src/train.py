@@ -77,7 +77,7 @@ def main(args):
     loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     model.train_only(train_loader, args.epochs, loss_fct, args.learning_rate, args.weight_decay)
 
-    predictions = model.predict(test_loader)
+    predictions = model.predict(test_loader, args.cutting_threshold)
     path_submission = os.path.join(args.submission, f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
     print('\npath_submission:', path_submission)
     submission = pd.DataFrame({'ID': test_dst.df.index.values,
@@ -103,6 +103,8 @@ if __name__ == "__main__":
                         help="learning rate")
     parser.add_argument("-wd", "--weight_decay", type=float, default=1e-5,
                         help="weight decay for L2 regularization")
+    parser.add_argument("-ct", "--cutting_threshold", type=float, default=0.5,
+                        help="cutting threshold")
     parser.add_argument("-ts", "--test_size", type=float, default=0.2,
                         help="dataset learning rate")
     parser.add_argument("-d", "--dataset", type=str, default="../3md3070-dlmi/",

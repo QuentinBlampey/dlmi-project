@@ -13,6 +13,7 @@ class BackBone(nn.Module):
         self.cnn = cnn
         self.aggregator = aggregator
         self.top_head = top_head
+        self.best_thresholds = []
 
     def forward(self, images, medical_data):
         x = self.cnn(images)
@@ -56,6 +57,8 @@ class BackBone(nn.Module):
             if ba > best[0]:
                 best = (ba, threshold)
         print('   > Best balance accuracy', best[0], 'at threshold', best[1])
+        if not self.training:
+            self.best_thresholds.append(best[1])
         
         return epoch_loss, acc
 
@@ -86,8 +89,12 @@ class BackBone(nn.Module):
             train_loss, train_acc = self.step(train_loader)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
-    def predict(self, test_loader):
+    def predict(self, test_loader, cutting_threshold):
         print("\nComputing predictions")
+        self.best_thresholds = np.array(self.best_thresholds)
+        #best_threshold = self.best_thresholds[-10:].mean()
+        print(f"Cutting at threshold {cutting_threshold}")
+
         y_preds = []
         self.eval()
         with torch.no_grad():
@@ -95,7 +102,7 @@ class BackBone(nn.Module):
                 images = images.to(self.device)[0, :]
                 medical_data = medical_data.to(self.device)[0, :]
                 logits = self(images, medical_data)
-                pred = torch.round(torch.sigmoid(logits))
+                pred = torch.sigmoid(logits) >= cutting_threshold
                 y_preds.append(int(pred.item()))
 
         return y_preds
