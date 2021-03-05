@@ -40,6 +40,9 @@ class BackBone(nn.Module):
                 self.optimizer.step()
                 self.optimizer.zero_grad()
 
+        print(self.training, np.mean(y_preds), np.mean(y_true))
+        if not self.training:
+            print(y_preds, y_true)
         acc = balanced_accuracy_score(np.array(y_preds), np.array(y_true))
         return epoch_loss, acc
 

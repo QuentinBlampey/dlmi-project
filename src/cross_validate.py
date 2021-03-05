@@ -28,7 +28,7 @@ def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learnin
         train_dst = LymphDataset(path_train, df_train, get_transform(True))
         val_dst = LymphDataset(path_val, df_val, get_transform(False))
         train_loader = DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=num_workers)
-        val_loader = DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=num_workers)
+        val_loader = DataLoader(val_dst, batch_size=1, shuffle=False, num_workers=num_workers)
         model = model_factory()
         val_acc = model.train_and_eval(train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay)
         accuracies.append(val_acc)
