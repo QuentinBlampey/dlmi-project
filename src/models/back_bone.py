@@ -102,7 +102,10 @@ class BackBone(nn.Module):
                 images = images.to(self.device)[0, :]
                 medical_data = medical_data.to(self.device)[0, :]
                 logits = self(images, medical_data)
-                pred = torch.sigmoid(logits) >= cutting_threshold
-                y_preds.append(int(pred.item()))
+                if cutting_threshold == 0:
+                    y_preds.append(torch.sigmoid(logits).item())
+                else:
+                    pred = torch.sigmoid(logits) >= cutting_threshold
+                    y_preds.append(int(pred.item()))
 
         return y_preds
