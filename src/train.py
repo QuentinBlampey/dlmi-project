@@ -41,8 +41,8 @@ def main(args):
     path_train = [[file for file in files if p_id + '/' in file] for p_id in df.index]
     path_test = [[file for file in files if p_id + '/' in file] for p_id in df_test.index]
 
-    train_dst = LymphDataset(path_train, df, get_transform(True))
-    test_dst = LymphDataset(path_test, df_test, get_transform(False))
+    train_dst = LymphDataset(path_train, df, get_transform(True), preprocess=args.preprocess)
+    test_dst = LymphDataset(path_test, df_test, get_transform(False), preprocess=args.preprocess)
 
     train_loader = DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=args.num_workers)
     test_loader = DataLoader(test_dst, batch_size=1, shuffle=False, num_workers=args.num_workers)
@@ -107,7 +107,10 @@ if __name__ == "__main__":
                         help="dataset learning rate")
     parser.add_argument("-d", "--dataset", type=str, default="../3md3070-dlmi/",
                         help="path to the dataset")
-    parser.add_argument("-sub", "--submission",  type=str, default="../submissions", help="path to submission folder")
+    parser.add_argument("-sub", "--submission",  type=str, default="../submissions", 
+                        help="path to submission folder")
+    parser.add_argument("-p", "--preprocess", type=bool, default=False, const=True, nargs="?",
+                        help="whether or not to add image preprocessing")
 
     args = parser.parse_args()
     print(f"> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")

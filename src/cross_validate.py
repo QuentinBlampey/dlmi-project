@@ -16,7 +16,7 @@ from models.top_head import FullyConnectedHead, LinearHead
 from dataset import LymphDataset, get_transform
 import numpy as np
 
-def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers):
+def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers, preprocess):
     kf = KFold(k, random_state=0, shuffle=True)
     accuracies = []
     for n, (train_index, val_index) in enumerate(kf.split(df.index.values)):
@@ -25,8 +25,8 @@ def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learnin
         df_val = df.iloc[val_index]
         path_train = [[file for file in files if p_id + '/' in file] for p_id in df_train.index]
         path_val = [[file for file in files if p_id + '/' in file] for p_id in df_val.index]
-        train_dst = LymphDataset(path_train, df_train, get_transform(True))
-        val_dst = LymphDataset(path_val, df_val, get_transform(False))
+        train_dst = LymphDataset(path_train, df_train, get_transform(True), preprocess=preprocess)
+        val_dst = LymphDataset(path_val, df_val, get_transform(False), preprocess=preprocess)
         train_loader = DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=num_workers)
         val_loader = DataLoader(val_dst, batch_size=1, shuffle=False, num_workers=num_workers)
         model = model_factory()
@@ -84,7 +84,7 @@ def main(args):
     pos_weight = torch.tensor([50 / 113]).to(device)
     loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     accuracies = cross_validate(model_factory, df, files, int(args.kfolds), args.epochs, loss_fct, args.learning_rate, args.weight_decay,
-                   args.num_workers)
+                   args.num_workers, args.preprocess)
     print(f"\nAverage accuracy: {np.mean(accuracies)}, ({accuracies})")
 
 if __name__ == "__main__":
@@ -109,6 +109,8 @@ if __name__ == "__main__":
                         help="Number of folds")
     parser.add_argument("-d", "--dataset", type=str, default="../3md3070-dlmi/",
                         help="path to the dataset")
+    parser.add_argument("-p", "--preprocess", type=bool, default=False, const=True, nargs="?",
+                        help="whether or not to add image preprocessing")
 
     args = parser.parse_args()
     print(f"> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")

@@ -19,10 +19,11 @@ def get_transform(train):
 
 
 class LymphDataset(torch.utils.data.Dataset):
-    def __init__(self, images_path, df, transforms=None):
+    def __init__(self, images_path, df, transforms=None, preprocess=False):
         self.images_path = images_path
         self.df = df
         self.transforms = transforms
+        self.process = preprocess
 
         self.data_dict = {i: {"path": paths,
                               "lymph_count": self.df.LYMPH_COUNT[i],
@@ -33,16 +34,25 @@ class LymphDataset(torch.utils.data.Dataset):
                           for i, paths in enumerate(self.images_path)}
 
     def load_image(self, path):
-        images = imageio.imread(path).astype(np.uint8)
-        return images
+        image = imageio.imread(path).astype(np.uint8)
+        if self.process:
+            return self.preprocess(image)
+        else:
+            return image
 
-    def __getitem__(self, patient_id):
-        images = [self.load_image(path) for path in self.data_dict[patient_id]['path']]
+    def preprocess(self, image):
+        lymph = image[:,:,2] / image.sum(axis=2)
+        lymph = (lymph*255).astype(np.uint8)
+        filtered = image[:,:,0]*(image[:,:,0] < 230)
+        return np.stack((image[:,:,1], lymph, filtered), axis=2)
+
+    def __getitem__(self, index):
+        images = [self.load_image(path) for path in self.data_dict[index]['path']]
         medical_data = torch.as_tensor([
-            self.data_dict[patient_id]["lymph_count"],
-            self.data_dict[patient_id]["gender"],
-            self.data_dict[patient_id]["age"]], dtype=torch.float32)
-        label = torch.as_tensor(self.data_dict[patient_id]["label"], dtype=torch.int64)
+            self.data_dict[index]["lymph_count"],
+            self.data_dict[index]["gender"],
+            self.data_dict[index]["age"]], dtype=torch.float32)
+        label = torch.as_tensor(self.data_dict[index]["label"], dtype=torch.int64)
         
         if self.transforms:
             images = torch.stack([self.transforms(image) for image in images])
