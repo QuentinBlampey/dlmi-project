@@ -43,7 +43,8 @@ class BackBone(nn.Module):
 
         print(self.training, np.mean(y_preds), np.mean(y_true))
         if not self.training:
-            print(y_preds, y_true)
+            print(y_preds)
+            print(list(map(int, y_true)))
         acc = balanced_accuracy_score(np.array(y_preds), np.array(y_true))
         print(f"   > {sum(y_preds)}/{len(y_preds)} positive predicted labels instead of {sum(y_true)}")
 
