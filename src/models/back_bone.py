@@ -21,7 +21,7 @@ class BackBone(nn.Module):
 
     def step(self, loader):
         epoch_loss = 0.0
-        y_preds, y_true = [], []
+        y_preds, probas, y_true = [], [], []
 
         for images, medical_data, label in tqdm(loader):
             images = images.to(self.device)[0, :]
@@ -32,6 +32,7 @@ class BackBone(nn.Module):
 
             loss = self.loss_function(logits, label)
             epoch_loss += loss
+            probas.append(logits.item())
             y_preds.append(int(pred.item()))
             y_true.append(label.item())
 
@@ -44,6 +45,15 @@ class BackBone(nn.Module):
         if not self.training:
             print(y_preds, y_true)
         acc = balanced_accuracy_score(np.array(y_preds), np.array(y_true))
+        print(f"   > {sum(y_preds)}/{len(y_preds)} positive predicted labels instead of {sum(y_true)}")
+
+        probas = np.array(probas)
+        acc_by_threshold = []
+        for threshold in sorted(set(probas)):
+            preds = (probas >= threshold).astype(int)
+            acc_by_threshold.append((threshold, balanced_accuracy_score(np.array(preds), np.array(y_true))))
+        print('   > Balance accuracy for each trhreshold:', acc_by_threshold)
+        
         return epoch_loss, acc
 
     def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay):

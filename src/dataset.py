@@ -51,4 +51,4 @@ class LymphDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.data_dict)
-        # return 2 if len(self.data_dict) != 42 else 42
+        #return 4 if len(self.data_dict) != 42 else 42
