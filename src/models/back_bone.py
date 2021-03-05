@@ -32,7 +32,7 @@ class BackBone(nn.Module):
 
             loss = self.loss_function(logits, label)
             epoch_loss += loss
-            probas.append(logits.item())
+            probas.append(torch.sigmoid(logits).item())
             y_preds.append(int(pred.item()))
             y_true.append(label.item())
 
@@ -49,11 +49,13 @@ class BackBone(nn.Module):
         print(f"   > {sum(y_preds)}/{len(y_preds)} positive predicted labels instead of {sum(y_true)}")
 
         probas = np.array(probas)
-        acc_by_threshold = []
+        best = (0,0)
         for threshold in sorted(set(probas)):
             preds = (probas >= threshold).astype(int)
-            acc_by_threshold.append((threshold, balanced_accuracy_score(np.array(preds), np.array(y_true))))
-        print('   > Balance accuracy for each trhreshold:', acc_by_threshold)
+            ba = balanced_accuracy_score(np.array(preds), np.array(y_true))
+            if ba > best[0]:
+                best = (ba, threshold)
+        print('   > Best balance accuracy', best[0], 'at threshold', best[1])
         
         return epoch_loss, acc
 
