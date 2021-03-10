@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch
 import torchvision.models as models
+from efficientnet_pytorch import EfficientNet
 
 class BaselineCNN(nn.Module):
     def __init__(self, size=16):
@@ -60,6 +61,9 @@ class PretrainedCNN(nn.Module):
                 for param in layer.parameters():
                     param.require_grad = False
             self.net.fc = nn.Linear(2048, size)
+
+        elif cnn == 'efficientnet':
+            self.net = EfficientNet.from_pretrained('efficientnet-b1', num_classes=size)
 
         else:
             raise NameError('Invalid cnn name')
