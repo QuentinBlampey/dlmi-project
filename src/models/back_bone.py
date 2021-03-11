@@ -64,8 +64,11 @@ class BackBone(nn.Module):
         plt.xlim(0,1)
         plt.ylim(0,1)
         path_fig = f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.png"
-        plt.savefig(f"../submissions/{path_fig}")
-        print("Fig saved. Named:", path_fig)
+        try:
+            plt.savefig(f"../submissions/{path_fig}")
+            print("Fig saved. Named:", path_fig)
+        except:
+            pass
         plt.close()
 
         if not self.training:
