@@ -4,8 +4,8 @@ import torch.nn as nn
 from sklearn.metrics import balanced_accuracy_score
 from torch.optim import Adam
 from tqdm import tqdm
-
-
+import matplotlib.pyplot as plt
+from datetime import datetime
 class BackBone(nn.Module):
     def __init__(self, cnn, aggregator, top_head, device):
         super(BackBone, self).__init__()
@@ -51,12 +51,23 @@ class BackBone(nn.Module):
 
         probas = np.array(probas)
         best = (0,0)
-        for threshold in sorted(set(probas)):
+        ba_list = []
+        thresholds = sorted(set(probas))
+        for threshold in thresholds:
             preds = (probas >= threshold).astype(int)
             ba = balanced_accuracy_score(np.array(preds), np.array(y_true))
+            ba_list.append(ba)
             if ba > best[0]:
                 best = (ba, threshold)
         print('   > Best balance accuracy', best[0], 'at threshold', best[1])
+        plt.plot(thresholds, ba_list)
+        plt.xlim(0,1)
+        plt.ylim(0,1)
+        path_fig = f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.png"
+        plt.savefig(f"../submissions/{path_fig}")
+        print("Fig saved. Named:", path_fig)
+        plt.close()
+
         if not self.training:
             self.best_thresholds.append(best[1])
         
