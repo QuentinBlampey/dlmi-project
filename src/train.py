@@ -75,7 +75,7 @@ def main(args):
 
     pos_weight = torch.tensor([50 / 113]).to(device)
     loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    model.train_only(train_loader, args.epochs, loss_fct, args.learning_rate, args.weight_decay)
+    model.train_only(train_loader, args.epochs, loss_fct, args.learning_rate, args.weight_decay, args.batch_size)
 
     predictions = model.predict(test_loader, args.cutting_threshold)
     path_submission = os.path.join(args.submission, f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
@@ -109,10 +109,12 @@ if __name__ == "__main__":
                         help="dataset learning rate")
     parser.add_argument("-d", "--dataset", type=str, default="../3md3070-dlmi/",
                         help="path to the dataset")
-    parser.add_argument("-sub", "--submission",  type=str, default="../submissions", 
+    parser.add_argument("-sub", "--submission", type=str, default="../submissions",
                         help="path to submission folder")
     parser.add_argument("-p", "--preprocess", type=bool, default=False, const=True, nargs="?",
                         help="whether or not to add image preprocessing")
+    parser.add_argument("-b", "--batch_size", type=int, default=1,
+                        help="Batch size")
 
     args = parser.parse_args()
     print(f"> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")

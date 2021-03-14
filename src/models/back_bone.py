@@ -5,7 +5,10 @@ from sklearn.metrics import balanced_accuracy_score
 from torch.optim import Adam
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+
 from datetime import datetime
+
+
 class BackBone(nn.Module):
     def __init__(self, cnn, aggregator, top_head, device):
         super(BackBone, self).__init__()
@@ -20,11 +23,12 @@ class BackBone(nn.Module):
         x = self.aggregator(x)
         return self.top_head(x, medical_data)
 
-    def step(self, loader):
+    def step(self, loader, batch_size):
         epoch_loss = 0.0
         y_preds, probas, y_true = [], [], []
-
+        count_batch = 0
         for images, medical_data, label in tqdm(loader):
+            count_batch += 1
             images = images.to(self.device)[0, :]
             medical_data = medical_data.to(self.device)[0, :]
             label = label.type(torch.FloatTensor).to(self.device)
@@ -37,7 +41,8 @@ class BackBone(nn.Module):
             y_preds.append(int(pred.item()))
             y_true.append(label.item())
 
-            if self.training:
+            if self.training and count_batch == batch_size:
+                count_batch = 0
                 loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
@@ -50,7 +55,7 @@ class BackBone(nn.Module):
         print(f"   > {sum(y_preds)}/{len(y_preds)} positive predicted labels instead of {sum(y_true)}")
 
         probas = np.array(probas)
-        best = (0,0)
+        best = (0, 0)
         ba_list = []
         thresholds = sorted(set(probas))
         for threshold in thresholds:
@@ -61,8 +66,8 @@ class BackBone(nn.Module):
                 best = (ba, threshold)
         print('   > Best balance accuracy', best[0], 'at threshold', best[1])
         plt.plot(thresholds, ba_list)
-        plt.xlim(0,1)
-        plt.ylim(0,1)
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
         path_fig = f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.png"
         try:
             plt.savefig(f"../submissions/{path_fig}")
@@ -73,10 +78,10 @@ class BackBone(nn.Module):
 
         if not self.training:
             self.best_thresholds.append(best[1])
-        
+
         return epoch_loss, acc
 
-    def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay):
+    def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay, batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
@@ -84,29 +89,29 @@ class BackBone(nn.Module):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
 
             self.train()
-            train_loss, train_acc = self.step(train_loader)
+            train_loss, train_acc = self.step(train_loader, batch_size)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
             self.eval()
             with torch.no_grad():
-                _, val_acc = self.step(val_loader)
+                _, val_acc = self.step(val_loader, batch_size)
             print(f"Val acc: {val_acc} ")
         return val_acc
 
-    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay):
+    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
         for epoch in range(n_epochs):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
             self.train()
-            train_loss, train_acc = self.step(train_loader)
+            train_loss, train_acc = self.step(train_loader, batch_size)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
     def predict(self, test_loader, cutting_threshold):
         print("\nComputing predictions")
         self.best_thresholds = np.array(self.best_thresholds)
-        #best_threshold = self.best_thresholds[-10:].mean()
+        # best_threshold = self.best_thresholds[-10:].mean()
         print(f"Cutting at threshold {cutting_threshold}")
 
         y_preds = []
