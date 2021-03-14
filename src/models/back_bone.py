@@ -27,6 +27,7 @@ class BackBone(nn.Module):
         epoch_loss = 0.0
         y_preds, probas, y_true = [], [], []
         count_batch = 0
+        loss = 0
         for images, medical_data, label in tqdm(loader):
             count_batch += 1
             images = images.to(self.device)[0, :]
@@ -35,7 +36,7 @@ class BackBone(nn.Module):
             logits = self(images, medical_data)
             pred = torch.round(torch.sigmoid(logits))
 
-            loss = self.loss_function(logits, label)
+            loss += self.loss_function(logits, label)
             epoch_loss += loss
             probas.append(torch.sigmoid(logits).item())
             y_preds.append(int(pred.item()))
@@ -46,6 +47,7 @@ class BackBone(nn.Module):
                 loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
+                loss = 0
 
         print(self.training, np.mean(y_preds), np.mean(y_true))
         if not self.training:
