@@ -14,7 +14,7 @@ from dataset import LymphDataset, get_transform
 from models.aggregators import MeanAggregator, DotAttentionAggregator
 from models.back_bone import BackBone
 from models.cnn import BaselineCNN, PretrainedCNN
-from models.top_head import FullyConnectedHead, LinearHead
+from models.top_head import FullyConnectedHead, LinearHead, GatedHead
 
 
 def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers,
@@ -79,6 +79,8 @@ def main(args):
             top_head = FullyConnectedHead(args.size)
         elif args.top_head == 'linear':
             top_head = LinearHead(args.size)
+        elif args.top_head == 'gated':
+            top_head = GatedHead(args.size)
         else:
             raise NameError('Invalid top_head name')
 
@@ -99,7 +101,7 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--aggregator", type=str, default="mean",
                         choices=['mean', 'dot'], help="aggregator name")
     parser.add_argument("-t", "--top_head", type=str, default="fc",
-                        choices=['fc', 'linear'], help="top head name")
+                        choices=['fc', 'linear', 'gated'], help="top head name")
     parser.add_argument("-e", "--epochs", type=int, default=10,
                         help="number of epochs")
     parser.add_argument("-s", "--size", type=int, default=16,
