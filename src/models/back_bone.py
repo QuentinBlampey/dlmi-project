@@ -35,9 +35,11 @@ class BackBone(nn.Module):
             label = label.type(torch.FloatTensor).to(self.device)
             logits = self(images, medical_data)
             pred = torch.round(torch.sigmoid(logits))
-
+            del images
+            del medical_data
+            
             loss += self.loss_function(logits, label)
-            epoch_loss += loss
+            epoch_loss += loss.item()
             probas.append(torch.sigmoid(logits).item())
             y_preds.append(int(pred.item()))
             y_true.append(label.item())
@@ -49,6 +51,11 @@ class BackBone(nn.Module):
                 self.optimizer.zero_grad()
                 loss = 0
 
+        if self.training and count_batch > 0:
+          loss.backward()
+          self.optimizer.step()
+          self.optimizer.zero_grad()
+                    
         print(self.training, np.mean(y_preds), np.mean(y_true))
         if not self.training:
             print(y_preds)

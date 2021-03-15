@@ -49,7 +49,7 @@ class PretrainedCNN(nn.Module):
         elif cnn == 'resnet18':
             self.net = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=True)
             # freeze top layers
-            for layer in list(self.net.children())[:-10]:
+            for layer in list(self.net.children())[:-3]:
                 for param in layer.parameters():
                     param.require_grad = False
 
@@ -57,7 +57,7 @@ class PretrainedCNN(nn.Module):
 
         elif cnn == 'resnet101':
             self.net = models.resnet101(pretrained=True)
-            for layer in list(self.net.children())[:-10]:
+            for layer in list(self.net.children())[:-3]:
                 for param in layer.parameters():
                     param.require_grad = False
             self.net.fc = nn.Linear(2048, size)
