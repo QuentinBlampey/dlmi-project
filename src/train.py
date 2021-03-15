@@ -14,6 +14,7 @@ from models.aggregators import MeanAggregator, DotAttentionAggregator
 from models.back_bone import BackBone
 from models.cnn import BaselineCNN, PretrainedCNN
 from models.top_head import FullyConnectedHead, LinearHead
+from models.train_utils import get_args, build_model
 
 
 def main(args):
@@ -47,34 +48,13 @@ def main(args):
     train_loader = DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=args.num_workers)
     test_loader = DataLoader(test_dst, batch_size=1, shuffle=False, num_workers=args.num_workers)
 
-    ### CNN
-    if args.cnn == 'baseline':
-        cnn = BaselineCNN(size=args.size)
+    model = build_model(args.cnn, args.aggregator, args.top_head, args.size, device)
+
+    if args.loss_weighting:
+        pos_weight = torch.tensor([50 / 113]).to(device)
+        loss_fct = nn.BCEWithLogitsLoss(pos_weight)
     else:
-        cnn = PretrainedCNN(size=args.size, cnn=args.cnn)
-
-    ### Aggregator
-    if args.aggregator == 'mean':
-        aggregator = MeanAggregator()
-    elif args.aggregator == 'dot':
-        aggregator = DotAttentionAggregator(args.size)
-    else:
-        raise NameError('Invalid aggregator name')
-
-    ### Top head
-    if args.top_head == 'fc':
-        top_head = FullyConnectedHead(args.size)
-    elif args.top_head == 'linear':
-        top_head = LinearHead(args.size)
-    else:
-        raise NameError('Invalid top_head name')
-
-    ### Training
-
-    model = BackBone(cnn, aggregator, top_head, device).to(device)
-
-    pos_weight = torch.tensor([50 / 113]).to(device)
-    loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        loss_fct = nn.BCEWithLogitsLoss()
     model.train_only(train_loader, args.epochs, loss_fct, args.learning_rate, args.weight_decay, args.batch_size)
 
     predictions = model.predict(test_loader, args.cutting_threshold)
@@ -86,36 +66,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--cnn", type=str, default="baseline",
-                        help="cnn name")
-    parser.add_argument("-a", "--aggregator", type=str, default="mean",
-                        choices=['mean', 'dot'], help="aggregator name")
-    parser.add_argument("-t", "--top_head", type=str, default="fc",
-                        choices=['fc', 'linear'], help="top head name")
-    parser.add_argument("-e", "--epochs", type=int, default=10,
-                        help="number of epochs")
-    parser.add_argument("-s", "--size", type=int, default=16,
-                        help="cnn output size")
-    parser.add_argument("-nw", "--num_workers", type=int, default=8,
-                        help="number of workers")
-    parser.add_argument("-lr", "--learning_rate", type=float, default=1e-4,
-                        help="learning rate")
-    parser.add_argument("-wd", "--weight_decay", type=float, default=1e-5,
-                        help="weight decay for L2 regularization")
-    parser.add_argument("-ct", "--cutting_threshold", type=float, default=0.5,
-                        help="cutting threshold")
-    parser.add_argument("-ts", "--test_size", type=float, default=0.2,
-                        help="dataset learning rate")
-    parser.add_argument("-d", "--dataset", type=str, default="../3md3070-dlmi/",
-                        help="path to the dataset")
-    parser.add_argument("-sub", "--submission", type=str, default="../submissions",
-                        help="path to submission folder")
-    parser.add_argument("-p", "--preprocess", type=bool, default=False, const=True, nargs="?",
-                        help="whether or not to add image preprocessing")
-    parser.add_argument("-b", "--batch_size", type=int, default=1,
-                        help="Batch size")
-
-    args = parser.parse_args()
+    args = get_args()
     print(f"> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
     main(args)
