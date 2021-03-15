@@ -3,7 +3,7 @@ import argparse
 from models.aggregators import MeanAggregator, DotAttentionAggregator
 from models.back_bone import BackBone
 from models.cnn import BaselineCNN, PretrainedCNN
-from models.top_head import FullyConnectedHead, LinearHead
+from models.top_head import FullyConnectedHead, LinearHead, GatedHead
 
 
 def get_args():
@@ -63,6 +63,8 @@ def build_model(cnn, aggregator, top_head, size, device):
         top_head = FullyConnectedHead(size)
     elif top_head == 'linear':
         top_head = LinearHead(size)
+    elif top_head == "gated":
+        top_head = GatedHead(size)
     else:
         raise NameError('Invalid top_head name')
 
