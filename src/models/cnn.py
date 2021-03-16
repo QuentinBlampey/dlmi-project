@@ -32,8 +32,8 @@ class PretrainedCNN(nn.Module):
         if cnn == 'vgg11':
             self.net  = torch.hub.load('pytorch/vision:v0.6.0', 'vgg11', pretrained=True)
             self.net.classifier[6] = nn.Linear(4096, size)
-            # freeze top layers
-            for layer in self.net.features:
+            # unfreeze top layers
+            for layer in self.net.features[-3]:
                 for p in layer.parameters():
                     p.requires_grad = False
 
@@ -42,9 +42,9 @@ class PretrainedCNN(nn.Module):
             self.net.classifier.add_module("relu", nn.ReLU(inplace=True))
             self.net.classifier.add_module("last_layer", nn.Linear(1000, size))
 
-            #for name, param in self.net.named_parameters():
-            #    if not name.split('.')[0] == 'classifier':
-            #        param.requires_grad = False
+            for layer in self.net.features[-3]:
+                for p in layer.parameters():
+                    p.requires_grad = False
 
         elif cnn == 'resnet18':
             self.net = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=True)
