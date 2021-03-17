@@ -42,7 +42,7 @@ class PretrainedCNN(nn.Module):
             self.net.classifier.add_module("relu", nn.ReLU(inplace=True))
             self.net.classifier.add_module("last_layer", nn.Linear(1000, size))
 
-            for layer in self.net.features[-3]:
+            for layer in self.net.features:
                 for p in layer.parameters():
                     p.requires_grad = False
 
@@ -72,6 +72,9 @@ class PretrainedCNN(nn.Module):
 
         elif cnn == 'efficientnet':
             self.net = EfficientNet.from_pretrained('efficientnet-b1', num_classes=size)
+            for layer in self.net._blocks:
+                for param in layer.parameters():
+                    param.require_grad = False
 
         else:
             raise NameError('Invalid cnn name')
