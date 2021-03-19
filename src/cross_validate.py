@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
@@ -20,9 +20,9 @@ from models.train_utils import get_args, build_model
 
 def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers,
                    preprocess, batch_size):
-    kf = KFold(k, random_state=0, shuffle=True)
+    kf = StratifiedKFold(k, random_state=0, shuffle=True)
     accuracies = []
-    for n, (train_index, val_index) in enumerate(kf.split(df.index.values)):
+    for n, (train_index, val_index) in enumerate(kf.split(df.index.values, df["LABEL"])):
         print(f"Fold {n + 1}")
         df_train = df.iloc[train_index]
         df_val = df.iloc[val_index]
