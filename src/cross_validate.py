@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 
@@ -11,10 +10,6 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
 from dataset import LymphDataset, get_transform
-from models.aggregators import MeanAggregator, DotAttentionAggregator
-from models.back_bone import BackBone
-from models.cnn import BaselineCNN, PretrainedCNN
-from models.top_head import FullyConnectedHead, LinearHead, GatedHead
 from models.train_utils import get_args, build_model
 
 
@@ -34,7 +29,7 @@ def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learnin
         val_loader = DataLoader(val_dst, batch_size=1, shuffle=False, num_workers=num_workers)
         model = model_factory()
         val_acc = model.train_and_eval(train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay,
-                                       batch_size)
+                                       [args.lambda1, args.lambda2, args.lambda3], batch_size)
         accuracies.append(val_acc)
     return accuracies
 
@@ -62,6 +57,7 @@ def main(args):
 
     def model_factory():
         return build_model(args.cnn, args.aggregator, args.top_head, args.size, device)
+
     if args.loss_weighting:
         pos_weight = torch.tensor([50 / 113]).to(device)
         loss_fct = nn.BCEWithLogitsLoss(pos_weight)

@@ -23,7 +23,7 @@ class BackBone(nn.Module):
         x = self.aggregator(x)
         return self.top_head(x, medical_data)
 
-    def step(self, loader, batch_size):
+    def step(self, loader, batch_size, lambdas):
         epoch_loss = 0.0
         y_preds, probas, y_true = [], [], []
         count_batch = 0
@@ -33,14 +33,17 @@ class BackBone(nn.Module):
             images = images.to(self.device)[0, :]
             medical_data = medical_data.to(self.device)[0, :]
             label = label.type(torch.FloatTensor).to(self.device)
-            logits = self(images, medical_data)
-            pred = torch.round(torch.sigmoid(logits))
+            y_med, y_cnn, y_joint = self(images, medical_data)
+            pred = torch.round(torch.sigmoid(y_joint))
             del images
             del medical_data
             
-            loss += self.loss_function(logits, label)
+            loss += lambdas[0] * self.loss_function(y_med, label) + \
+                    lambdas[1] * self.loss_function(y_cnn, label) + \
+                    lambdas[2] * self.loss_function(y_joint, label)
             epoch_loss += loss.item()
-            probas.append(torch.sigmoid(logits).item())
+
+            probas.append(torch.sigmoid(y_joint).item())
             y_preds.append(int(pred.item()))
             y_true.append(label.item())
 
@@ -90,7 +93,8 @@ class BackBone(nn.Module):
 
         return epoch_loss, acc
 
-    def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay, batch_size=1):
+    def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay,
+                       lambdas,batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
@@ -98,23 +102,23 @@ class BackBone(nn.Module):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
 
             self.train()
-            train_loss, train_acc = self.step(train_loader, batch_size)
+            train_loss, train_acc = self.step(train_loader, batch_size, lambdas)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
             self.eval()
             with torch.no_grad():
-                _, val_acc = self.step(val_loader, batch_size)
+                _, val_acc = self.step(val_loader, batch_size, lambdas)
             print(f"Val acc: {val_acc} ")
         return val_acc
 
-    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, batch_size=1):
+    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, lambdas, batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
         for epoch in range(n_epochs):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
             self.train()
-            train_loss, train_acc = self.step(train_loader, batch_size)
+            train_loss, train_acc = self.step(train_loader, batch_size, lambdas)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
     def predict(self, test_loader, cutting_threshold):
@@ -129,11 +133,11 @@ class BackBone(nn.Module):
             for images, medical_data, _ in tqdm(test_loader):
                 images = images.to(self.device)[0, :]
                 medical_data = medical_data.to(self.device)[0, :]
-                logits = self(images, medical_data)
+                y_med, y_cnn, y_joint = self(images, medical_data)
                 if cutting_threshold == 0:
-                    y_preds.append(torch.sigmoid(logits).item())
+                    y_preds.append(torch.sigmoid(y_joint).item())
                 else:
-                    pred = torch.sigmoid(logits) >= cutting_threshold
+                    pred = torch.sigmoid(y_joint) >= cutting_threshold
                     y_preds.append(int(pred.item()))
 
         return y_preds

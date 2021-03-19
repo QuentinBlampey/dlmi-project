@@ -40,6 +40,9 @@ def get_args():
                         help="Batch size")
     parser.add_argument("-lw", "--loss_weighting", type=bool, default=False,
                         help="Weight the loss to account unbalance between positive and negative")
+    parser.add_argument("-l1", "--lambda1", type=float, default=0.33)
+    parser.add_argument("-l2", "--lambda2", type=float, default=0.33)
+    parser.add_argument("-l3", "--lambda3", type=float, default=0.33)
     return parser.parse_args()
 
 

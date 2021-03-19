@@ -72,4 +72,4 @@ class GatedHead(nn.Module):
         pi_cnn = self.gate(torch.cat((x, medical_data)))
         y_med = self.medical_model(medical_data)
         y_cnn = self.cnn_model(x)
-        return pi_cnn * y_cnn + (1 - pi_cnn) * y_med
+        return y_med, y_cnn, pi_cnn * y_cnn + (1 - pi_cnn) * y_med
