@@ -9,6 +9,9 @@ import torch.nn as nn
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
+import torch.multiprocessing as mp
 
 from dataset import LymphDataset, get_transform
 from models.aggregators import MeanAggregator, DotAttentionAggregator
@@ -18,7 +21,27 @@ from models.top_head import FullyConnectedHead, LinearHead, GatedHead
 from models.train_utils import get_args, build_model
 
 
-def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers,
+def setup(rank, world_size):
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12355'
+
+    # initialize the process group
+    dist.init_process_group("gloo", rank=rank, world_size=world_size)
+
+def cleanup():
+    dist.destroy_process_group()
+
+def demo(*args):
+    def demo_basic(rank, world_size):
+        print(f"Running basic DDP example on rank {rank}.")
+        setup(rank, world_size)
+
+        cross_validate(rank, *args)
+
+        cleanup()
+    return demo_basic
+
+def cross_validate(rank, model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers,
                    preprocess, batch_size):
     kf = StratifiedKFold(k, random_state=0, shuffle=True)
     accuracies = []
@@ -32,7 +55,8 @@ def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learnin
         val_dst = LymphDataset(path_val, df_val, get_transform(False), preprocess=preprocess)
         train_loader = DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=num_workers)
         val_loader = DataLoader(val_dst, batch_size=1, shuffle=False, num_workers=num_workers)
-        model = model_factory()
+        model = model_factory().to(rank)
+        model = DDP(model, device_ids=[rank])
         val_acc = model.train_and_eval(train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay,
                                        batch_size)
         accuracies.append(val_acc)
@@ -43,6 +67,12 @@ def main(args):
     torch.manual_seed(1)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"> Device: {device}\n")
+
+    if device == "cuda":
+        world_size = torch.cuda.device_count()
+        print(f"> Number of devices: {world_size}")
+        for i in range(world_size):
+            torch.cuda.set_device(i)
 
     ### Loaders construction
 
@@ -67,10 +97,17 @@ def main(args):
         loss_fct = nn.BCEWithLogitsLoss(pos_weight)
     else:
         loss_fct = nn.BCEWithLogitsLoss()
-    accuracies = cross_validate(model_factory, df, files, int(args.kfolds), args.epochs, loss_fct, args.learning_rate,
+
+    mp.spawn(demo(model_factory, df, files, int(args.kfolds), args.epochs, loss_fct, args.learning_rate,
                                 args.weight_decay,
-                                args.num_workers, args.preprocess, args.batch_size)
-    print(f"\nAverage accuracy: {np.mean(accuracies)}, ({accuracies})")
+                                args.num_workers, args.preprocess, args.batch_size),
+             args=(world_size,),
+             nprocs=world_size,
+             join=True)
+    # accuracies = cross_validate(model_factory, df, files, int(args.kfolds), args.epochs, loss_fct, args.learning_rate,
+    #                             args.weight_decay,
+    #                             args.num_workers, args.preprocess, args.batch_size)
+    # print(f"\nAverage accuracy: {np.mean(accuracies)}, ({accuracies})")
 
 
 if __name__ == "__main__":
