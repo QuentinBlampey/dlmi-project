@@ -14,7 +14,7 @@ from models.train_utils import get_args, build_model
 
 
 def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers,
-                   preprocess, batch_size):
+                   preprocess, batch_size, cutting_threshold):
     kf = StratifiedKFold(k, random_state=0, shuffle=True)
     accuracies = []
     for n, (train_index, val_index) in enumerate(kf.split(df.index.values, df["LABEL"])):
@@ -29,7 +29,7 @@ def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learnin
         val_loader = DataLoader(val_dst, batch_size=1, shuffle=False, num_workers=num_workers)
         model = model_factory()
         val_acc = model.train_and_eval(train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay,
-                                       [args.lambda1, args.lambda2, args.lambda3], batch_size)
+                                       [args.lambda1, args.lambda2, args.lambda3],args.cutting_threshold, batch_size)
         accuracies.append(val_acc)
     return accuracies
 
@@ -65,7 +65,7 @@ def main(args):
         loss_fct = nn.BCEWithLogitsLoss()
     accuracies = cross_validate(model_factory, df, files, int(args.kfolds), args.epochs, loss_fct, args.learning_rate,
                                 args.weight_decay,
-                                args.num_workers, args.preprocess, args.batch_size)
+                                args.num_workers, args.preprocess, args.batch_size, args.cutting_threshold)
     print(f"\nAverage accuracy: {np.mean(accuracies)}, ({accuracies})")
 
 

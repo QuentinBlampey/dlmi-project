@@ -23,7 +23,7 @@ class BackBone(nn.Module):
         x = self.aggregator(x)
         return self.top_head(x, medical_data)
 
-    def step(self, loader, batch_size, lambdas):
+    def step(self, loader, batch_size, lambdas, cutting_threshold):
         epoch_loss = 0.0
         y_preds, probas, y_true = [], [], []
         count_batch = 0
@@ -34,7 +34,8 @@ class BackBone(nn.Module):
             medical_data = medical_data.to(self.device)[0, :]
             label = label.type(torch.FloatTensor).to(self.device)
             y_med, y_cnn, y_joint = self(images, medical_data)
-            pred = torch.round(torch.sigmoid(y_joint))
+            pred = torch.sigmoid(y_joint) >= cutting_threshold
+            y_preds.append(int(pred.item()))
             del images
             del medical_data
 
@@ -94,7 +95,7 @@ class BackBone(nn.Module):
         return epoch_loss, acc
 
     def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay,
-                       lambdas, batch_size=1):
+                       lambdas, cutting_threshold, batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
@@ -102,23 +103,23 @@ class BackBone(nn.Module):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
 
             self.train()
-            train_loss, train_acc = self.step(train_loader, batch_size, lambdas)
+            train_loss, train_acc = self.step(train_loader, batch_size, lambdas, cutting_threshold)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
             self.eval()
             with torch.no_grad():
-                _, val_acc = self.step(val_loader, batch_size, lambdas)
+                _, val_acc = self.step(val_loader, batch_size, lambdas, cutting_threshold)
             print(f"Val acc: {val_acc} ")
         return val_acc
 
-    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, lambdas, batch_size=1):
+    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, lambdas, cutting_threshold, batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
         for epoch in range(n_epochs):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
             self.train()
-            train_loss, train_acc = self.step(train_loader, batch_size, lambdas)
+            train_loss, train_acc = self.step(train_loader, batch_size, lambdas, cutting_threshold)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
     def predict(self, test_loader, cutting_threshold):
