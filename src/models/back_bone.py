@@ -1,12 +1,12 @@
+from datetime import datetime
+
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.metrics import balanced_accuracy_score
 from torch.optim import Adam
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-
-from datetime import datetime
 
 
 class BackBone(nn.Module):
@@ -37,10 +37,10 @@ class BackBone(nn.Module):
             pred = torch.round(torch.sigmoid(y_joint))
             del images
             del medical_data
-            
-            loss += lambdas[0] * self.loss_function(y_med, label) + \
-                    lambdas[1] * self.loss_function(y_cnn, label) + \
-                    lambdas[2] * self.loss_function(y_joint, label)
+
+            loss += (lambdas[0] * self.loss_function(y_med, label) + \
+                     lambdas[1] * self.loss_function(y_cnn, label) + \
+                     lambdas[2] * self.loss_function(y_joint, label)) / np.sum(lambdas)
             epoch_loss += loss.item()
 
             probas.append(torch.sigmoid(y_joint).item())
@@ -55,10 +55,10 @@ class BackBone(nn.Module):
                 loss = 0
 
         if self.training and count_batch > 0:
-          loss.backward()
-          self.optimizer.step()
-          self.optimizer.zero_grad()
-                    
+            loss.backward()
+            self.optimizer.step()
+            self.optimizer.zero_grad()
+
         print(self.training, np.mean(y_preds), np.mean(y_true))
         if not self.training:
             print(y_preds)
@@ -94,7 +94,7 @@ class BackBone(nn.Module):
         return epoch_loss, acc
 
     def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay,
-                       lambdas,batch_size=1):
+                       lambdas, batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
