@@ -72,6 +72,9 @@ class PretrainedCNN(nn.Module):
 
         elif cnn == 'efficientnet':
             self.net = EfficientNet.from_pretrained('efficientnet-b1', num_classes=size)
+            for layer in self.net._blocks:
+                for param in layer.parameters():
+                    param.require_grad = False
 
         else:
             raise NameError('Invalid cnn name')

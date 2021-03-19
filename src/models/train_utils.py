@@ -38,7 +38,7 @@ def get_args():
                         help="whether or not to add image preprocessing")
     parser.add_argument("-b", "--batch_size", type=int, default=1,
                         help="Batch size")
-    parser.add_argument("-lw", "--loss_weighting", type=bool, default=False,
+    parser.add_argument("-lw", "--loss_weighting", type=bool, default=False, const=True, nargs="?",
                         help="Weight the loss to account unbalance between positive and negative")
     parser.add_argument("-l1", "--lambda1", type=float, default=1)
     parser.add_argument("-l2", "--lambda2", type=float, default=3)
