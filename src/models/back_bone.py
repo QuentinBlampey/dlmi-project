@@ -35,7 +35,6 @@ class BackBone(nn.Module):
             label = label.type(torch.FloatTensor).to(self.device)
             y_med, y_cnn, y_joint = self(images, medical_data)
             pred = torch.sigmoid(y_joint) >= cutting_threshold
-            y_preds.append(int(pred.item()))
             del images
             del medical_data
 
