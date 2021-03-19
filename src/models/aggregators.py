@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class MeanAggregator(nn.Module):
     def forward(self, x):
@@ -16,4 +17,5 @@ class DotAttentionAggregator(nn.Module):
         returns: a (size) tensor
         """
         attention = self.fc(x)
+        attention = F.softmax(attention, dim=0)
         return x.T.mm(attention).view(-1)

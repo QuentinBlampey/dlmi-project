@@ -44,28 +44,34 @@ class GatedHead(nn.Module):
     def __init__(self, size):
         super(GatedHead, self).__init__()
         self.gate = nn.Sequential(
-            nn.Linear(size + 3, 10),
+            nn.Linear(size + 3, 256),
             nn.ReLU(),
-            nn.Linear(10, 1),
+            nn.Linear(256, 1),
             nn.Sigmoid()
         )
         self.medical_model = nn.Sequential(
-            nn.Linear(3, 32),
+            nn.Linear(3, 256),
             nn.ReLU(),
-            nn.Linear(32, 64),
+            nn.Dropout(0.2),
+            nn.Linear(256, 512),
             nn.ReLU(),
-            nn.Linear(64, 32),
+            nn.Dropout(0.2),
+            nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Linear(32, 1),
+            nn.Dropout(0.2),
+            nn.Linear(256, 1),
         )
         self.cnn_model = nn.Sequential(
-            nn.Linear(size, 128),
+            nn.Linear(size, 256),
             nn.ReLU(),
-            nn.Linear(128, 256),
+            nn.Dropout(0.2),
+            nn.Linear(256, 512),
             nn.ReLU(),
-            nn.Linear(256, 128),
+            nn.Dropout(0.2),
+            nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Linear(128, 1),
+            nn.Dropout(0.2),
+            nn.Linear(256, 1),
         )
 
     def forward(self, x, medical_data):
