@@ -13,8 +13,6 @@ def get_transform(train):
         transforms.append(T.RandomRotation(180))
         transforms.append(T.RandomHorizontalFlip())
         transforms.append(T.RandomVerticalFlip())
-        transforms.append(T.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 3.3), value=0, inplace=False))
-        transforms.append(T.RandomPerspective(distortion_scale=0.5, p=0.5, interpolation=2, fill=0))
     transforms.append(T.ToTensor())
     transforms.append(T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
     return T.Compose(transforms)
