@@ -111,9 +111,9 @@ class BackBone(nn.Module):
                 _, val_acc, val_y_true, val_probas = self.step(val_loader, batch_size, lambdas, cutting_threshold)
             print(f"Val acc: {val_acc} ")
         with open(f"../submissions/train_{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.json", "w") as f:
-            json.dump({"y_true": train_y_true, "probas": train_probas}, f)
+            json.dump({"y_true": list(train_y_true), "probas": list(train_probas)}, f)
         with open(f"../submissions/val_{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.json", "w") as f:
-            json.dump({"y_true": val_y_true, "probas":val_probas}, f)
+            json.dump({"y_true": list(val_y_true), "probas":list(val_probas)}, f)
         return val_acc
 
     def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, lambdas, cutting_threshold, batch_size=1):
