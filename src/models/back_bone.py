@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -91,7 +92,7 @@ class BackBone(nn.Module):
         if not self.training:
             self.best_thresholds.append(best[1])
 
-        return epoch_loss, acc
+        return epoch_loss, acc, y_true, probas
 
     def train_and_eval(self, train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay,
                        lambdas, cutting_threshold, batch_size=1):
@@ -102,13 +103,17 @@ class BackBone(nn.Module):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
 
             self.train()
-            train_loss, train_acc = self.step(train_loader, batch_size, lambdas, cutting_threshold)
+            train_loss, train_acc, train_y_true, train_probas = self.step(train_loader, batch_size, lambdas, cutting_threshold)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
             self.eval()
             with torch.no_grad():
-                _, val_acc = self.step(val_loader, batch_size, lambdas, cutting_threshold)
+                _, val_acc, val_y_true, val_probas = self.step(val_loader, batch_size, lambdas, cutting_threshold)
             print(f"Val acc: {val_acc} ")
+        with open(f"../submissions/train_{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.json", "w") as f:
+            json.dump({"y_true": train_y_true, "probas": train_probas}, f)
+        with open(f"../submissions/val_{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.json", "w") as f:
+            json.dump({"y_true": val_y_true, "probas":val_probas}, f)
         return val_acc
 
     def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, lambdas, cutting_threshold, batch_size=1):
@@ -118,7 +123,7 @@ class BackBone(nn.Module):
         for epoch in range(n_epochs):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
             self.train()
-            train_loss, train_acc = self.step(train_loader, batch_size, lambdas, cutting_threshold)
+            train_loss, train_acc, _, _ = self.step(train_loader, batch_size, lambdas, cutting_threshold)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
     def predict(self, test_loader, cutting_threshold):
