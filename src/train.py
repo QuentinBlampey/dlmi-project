@@ -55,7 +55,7 @@ def main(args):
         loss_fct = nn.BCEWithLogitsLoss(pos_weight)
     else:
         loss_fct = nn.BCEWithLogitsLoss()
-    model.train_only(train_loader, args.epochs, loss_fct, args.learning_rate, args.weight_decay, args.batch_size)
+    model.train_only(train_loader, args.epochs, loss_fct, args.learning_rate, args.weight_decay, [args.lambda1, args.lambda2, args.lambda3], args.cutting_threshold, args.batch_size)
 
     predictions = model.predict(test_loader, args.cutting_threshold)
     path_submission = os.path.join(args.submission, f"{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.csv")
