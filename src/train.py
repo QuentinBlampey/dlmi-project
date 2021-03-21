@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 from datetime import datetime
@@ -10,11 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
 from dataset import LymphDataset, get_transform
-from models.aggregators import MeanAggregator, DotAttentionAggregator
-from models.back_bone import BackBone
-from models.cnn import BaselineCNN, PretrainedCNN
-from models.top_head import FullyConnectedHead, LinearHead
-from models.train_utils import get_args, build_model
+from train_utils import get_args, build_model
 
 
 def main(args):

@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
 from dataset import LymphDataset, get_transform
-from models.train_utils import get_args, build_model, find_best_ct
+from train_utils import get_args, build_model, find_best_ct
 
 
 def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers,
