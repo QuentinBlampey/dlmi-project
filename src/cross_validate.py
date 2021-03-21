@@ -1,7 +1,6 @@
 import json
 import os
 
-import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -10,13 +9,15 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
 from dataset import LymphDataset, get_transform
-from models.train_utils import get_args, build_model
+from models.train_utils import get_args, build_model, find_best_ct
 
 
 def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learning_rate, weight_decay, num_workers,
                    preprocess, batch_size, cutting_threshold):
     kf = StratifiedKFold(k, random_state=0, shuffle=True)
     accuracies = []
+    folds_y_true, folds_probas = [], []
+
     for n, (train_index, val_index) in enumerate(kf.split(df.index.values, df["LABEL"])):
         print(f"Fold {n + 1}")
         df_train = df.iloc[train_index]
@@ -28,10 +29,14 @@ def cross_validate(model_factory, df, files, k, n_epochs, loss_function, learnin
         train_loader = DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=num_workers)
         val_loader = DataLoader(val_dst, batch_size=1, shuffle=False, num_workers=num_workers)
         model = model_factory()
-        val_acc = model.train_and_eval(train_loader, val_loader, n_epochs, loss_function, learning_rate, weight_decay,
-                                       [args.lambda1, args.lambda2, args.lambda3],args.cutting_threshold, batch_size)
+        val_acc, y_true, y_probas = model.train_and_eval(train_loader, val_loader, n_epochs, loss_function,
+                                                         learning_rate, weight_decay,
+                                                         [args.lambda1, args.lambda2, args.lambda3],
+                                                         args.cutting_threshold, batch_size)
         accuracies.append(val_acc)
-    return accuracies
+        folds_y_true.append(y_true)
+        folds_probas.append(y_probas)
+    return accuracies, folds_y_true, folds_probas
 
 
 def main(args):
@@ -63,10 +68,14 @@ def main(args):
         loss_fct = nn.BCEWithLogitsLoss(pos_weight)
     else:
         loss_fct = nn.BCEWithLogitsLoss()
-    accuracies = cross_validate(model_factory, df, files, int(args.kfolds), args.epochs, loss_fct, args.learning_rate,
-                                args.weight_decay,
-                                args.num_workers, args.preprocess, args.batch_size, args.cutting_threshold)
-    print(f"\nAverage accuracy: {np.mean(accuracies)}, ({accuracies})")
+    accuracies, folds_y_true, folds_probas = cross_validate(model_factory, df, files, int(args.kfolds), args.epochs,
+                                                            loss_fct, args.learning_rate,
+                                                            args.weight_decay,
+                                                            args.num_workers, args.preprocess, args.batch_size,
+                                                            args.cutting_threshold)
+    best_score, best_ct = find_best_ct(folds_y_true, folds_probas)
+    print(f"Best Balanced Accuracy: {best_score}")
+    print(f"Best cutting threshold")
 
 
 if __name__ == "__main__":

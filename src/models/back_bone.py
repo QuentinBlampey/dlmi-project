@@ -114,7 +114,7 @@ class BackBone(nn.Module):
             json.dump({"y_true": list(train_y_true), "probas": list(train_probas)}, f)
         with open(f"../submissions/val_{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.json", "w") as f:
             json.dump({"y_true": list(val_y_true), "probas":list(val_probas)}, f)
-        return val_acc
+        return val_acc, val_y_true, val_probas
 
     def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, lambdas, cutting_threshold, batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)

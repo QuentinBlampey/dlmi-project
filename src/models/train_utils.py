@@ -1,5 +1,8 @@
 import argparse
 
+import numpy as np
+from sklearn.metrics import balanced_accuracy_score
+
 from models.aggregators import MeanAggregator, DotAttentionAggregator
 from models.back_bone import BackBone
 from models.cnn import BaselineCNN, PretrainedCNN
@@ -74,3 +77,18 @@ def build_model(cnn, aggregator, top_head, size, device):
     ### Training
 
     return BackBone(cnn, aggregator, top_head, device).to(device)
+
+
+def find_best_ct(folds_y_true, folds_probas):
+    ct_candidates = sorted(set([prob for probas in folds_probas for prob in probas]))
+    best_ct = 0
+    best_score = 0
+    for ct in ct_candidates:
+        scores = []
+        for i in range(len(folds_y_true)):
+            y_true, probas = folds_y_true[i], folds_probas[i]
+            scores.append(balanced_accuracy_score(np.array(probas) >= ct, np.array(y_true)))
+        if np.mean(scores) > best_score:
+            best_score = np.mean(scores)
+            best_ct = ct
+    return best_ct, best_score
