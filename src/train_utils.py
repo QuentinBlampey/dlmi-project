@@ -11,25 +11,25 @@ from models.top_head import FullyConnectedHead, LinearHead, GatedHead
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--cnn", type=str, default="baseline",
+    parser.add_argument("-c", "--cnn", type=str, default="vgg11",
                         help="cnn name")
     parser.add_argument("-a", "--aggregator", type=str, default="mean",
                         choices=['mean', 'dot'], help="aggregator name")
-    parser.add_argument("-t", "--top_head", type=str, default="fc",
+    parser.add_argument("-t", "--top_head", type=str, default="gated",
                         choices=['fc', 'linear', 'gated'], help="top head name")
-    parser.add_argument("-e", "--epochs", type=int, default=10,
+    parser.add_argument("-e", "--epochs", type=int, default=20,
                         help="number of epochs")
     parser.add_argument("-s", "--size", type=int, default=16,
                         help="cnn output size")
     parser.add_argument("-nw", "--num_workers", type=int, default=8,
                         help="number of workers")
-    parser.add_argument("-lr", "--learning_rate", type=float, default=1e-4,
+    parser.add_argument("-lr", "--learning_rate", type=float, default=2e-4,
                         help="dataset learning rate")
     parser.add_argument("-wd", "--weight_decay", type=float, default=5e-4,
                         help="optimizer weight decay")
-    parser.add_argument("-k", "--kfolds", type=float, default=5,
+    parser.add_argument("-k", "--kfolds", type=float, default=4,
                         help="Number of folds")
-    parser.add_argument("-ct", "--cutting_threshold", type=float, default=0.5,
+    parser.add_argument("-ct", "--cutting_threshold", type=float, default=0.25,
                         help="cutting threshold")
     parser.add_argument("-ts", "--test_size", type=float, default=0.2,
                         help="dataset learning rate")
@@ -39,7 +39,7 @@ def get_args():
                         help="path to submission folder")
     parser.add_argument("-p", "--preprocess", type=bool, default=False, const=True, nargs="?",
                         help="whether or not to add image preprocessing")
-    parser.add_argument("-b", "--batch_size", type=int, default=1,
+    parser.add_argument("-b", "--batch_size", type=int, default=3,clea
                         help="Batch size")
     parser.add_argument("-lw", "--loss_weighting", type=bool, default=False, const=True, nargs="?",
                         help="Weight the loss to account unbalance between positive and negative")

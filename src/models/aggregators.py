@@ -2,9 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class MeanAggregator(nn.Module):
     def forward(self, x):
         return torch.mean(x, axis=0)
+
 
 class DotAttentionAggregator(nn.Module):
     def __init__(self, size):

@@ -1,7 +1,8 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
 import torchvision.models as models
 from efficientnet_pytorch import EfficientNet
+
 
 class BaselineCNN(nn.Module):
     def __init__(self, size=16):
@@ -30,7 +31,7 @@ class PretrainedCNN(nn.Module):
     def __init__(self, size=16, cnn='vgg11'):
         super(PretrainedCNN, self).__init__()
         if cnn == 'vgg11':
-            self.net  = torch.hub.load('pytorch/vision:v0.6.0', 'vgg11', pretrained=True)
+            self.net = torch.hub.load('pytorch/vision:v0.6.0', 'vgg11', pretrained=True)
             self.net.classifier[6] = nn.Linear(4096, size)
             # unfreeze top layers
             for layer in self.net.features[:-3]:
@@ -54,7 +55,7 @@ class PretrainedCNN(nn.Module):
                     param.require_grad = False
 
             self.net.fc = nn.Linear(512, size)
-        
+
         elif cnn == 'resnet50':
             self.net = torch.hub.load('pytorch/vision:v0.6.0', 'resnet50', pretrained=True)
             # freeze top layers

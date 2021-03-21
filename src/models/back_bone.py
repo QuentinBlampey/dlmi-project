@@ -103,7 +103,8 @@ class BackBone(nn.Module):
             print(f"\nEpoch {epoch + 1}/{n_epochs}")
 
             self.train()
-            train_loss, train_acc, train_y_true, train_probas = self.step(train_loader, batch_size, lambdas, cutting_threshold)
+            train_loss, train_acc, train_y_true, train_probas = self.step(train_loader, batch_size, lambdas,
+                                                                          cutting_threshold)
             print(f"Train loss: {train_loss} | Train acc: {train_acc}")
 
             self.eval()
@@ -113,10 +114,11 @@ class BackBone(nn.Module):
         with open(f"../submissions/train_{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.json", "w") as f:
             json.dump({"y_true": list(train_y_true), "probas": list(train_probas)}, f)
         with open(f"../submissions/val_{datetime.now().strftime('%y-%m-%d_%Hh%Mm%Ss')}.json", "w") as f:
-            json.dump({"y_true": list(val_y_true), "probas":list(val_probas)}, f)
+            json.dump({"y_true": list(val_y_true), "probas": list(val_probas)}, f)
         return val_acc, val_y_true, val_probas
 
-    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, lambdas, cutting_threshold, batch_size=1):
+    def train_only(self, train_loader, n_epochs, loss_function, learning_rate, weight_decay, lambdas, cutting_threshold,
+                   batch_size=1):
         self.optimizer = Adam(self.parameters(), learning_rate, weight_decay=weight_decay)
         self.loss_function = loss_function
 
