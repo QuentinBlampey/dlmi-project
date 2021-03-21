@@ -39,7 +39,7 @@ def get_args():
                         help="path to submission folder")
     parser.add_argument("-p", "--preprocess", type=bool, default=False, const=True, nargs="?",
                         help="whether or not to add image preprocessing")
-    parser.add_argument("-b", "--batch_size", type=int, default=3,clea
+    parser.add_argument("-b", "--batch_size", type=int, default=3,
                         help="Batch size")
     parser.add_argument("-lw", "--loss_weighting", type=bool, default=False, const=True, nargs="?",
                         help="Weight the loss to account unbalance between positive and negative")
